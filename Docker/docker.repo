@@ -1,0 +1,11 @@
+#Create a docker repo in yum to pull the latest docker 
+
+#File location = cd /etc/yum.repos.d/
+#vim docker.repo
+
+[dockerrepo]
+name=Docker Repository
+baseurl=https://yum.dockerproject.org/repo/main/centos/7/
+enabled=1
+gpgcheck=1
+gpgkey=https://yum.dockerpproject.org/gpg
