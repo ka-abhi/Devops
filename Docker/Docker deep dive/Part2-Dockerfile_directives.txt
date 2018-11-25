@@ -1,0 +1,116 @@
+#######Dockerfile Directives: USER and RUN#############
+#to create a user using dockerfile and making that user as default login to container
+-------->Starting Dockerfile
+#Dockerfile based on latest Centos 7 image non-priveleged user
+FROM centos:latest
+MAINTAINER kaabhi<ka.abhishek@outlook.com>
+
+RUN useradd -ms /bin/bash abhi
+USER abhi
+
+------------>Ending Dockerfile
+docker build -t kaabhi/centos-abhiuser:v1 .
+
+docker run -it kaabhi/centos-abhiuser:v1 /bin/bash
+
+#to login to any runnning container as the root user use -u 0 (0 is the uid for root)
+docker exec -u 0 -it containername /bin/bash
+
+============================================================================================================
+
+###########RUN Order of Execution###############
+
+#the USER directive to be used at last as after this directive any command will be executed as USER#
+
+============================================================================================================
+
+###########Dockerfile Directives: ENV###############
+
+---------->Starting Dockerfile
+#Dockerfile based on latest Centos 7 image ,non-priveleged user, java8 installation and env variable set
+FROM centos:latest
+MAINTAINER kaabhi<ka.abhishek@outlook.com>
+
+RUN useradd -ms /bin/bash abhi
+
+RUN yum update -y
+RUN yum install -y net-tools wget
+
+#This goes to the home directory of root user and runs wget by acceptiing cookies and license agreement from oracle
+RUN cd ~ && wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "https://download.oracle.com/otn-pub/java/jdk/8u191-b12/2787e4a523244c269598db4e85c51e0c/jre-8u191-linux-x64.rpm"
+
+#localinstall so that all dependent packages are also installed
+RUN yum localinstall -y ~/jre-8u191-linux-x64.rpm
+
+USER abhi
+
+#this sets JAVA_HOME to abhi users' env variable
+RUN cd ~  && echo "export JAVA_HOME=/usr/java/jre1.8.0_191-amd64" >> /home/abhi/.bashrc
+
+#This sets JAVA_BIN as system wide env variable irrecpective of the user
+ENV JAVA_BIN=/usr/java/jre1.8.0_191-amd64/bin
+--------------> Ending Dockerfile
+
+============================================================================================================
+
+###########Dockerfile Directives: CMD vs. RUN###############
+
+#RUN carries out build work during the build of the image
+#CMD sets up a command to run when a container iis instantiated
+
+============================================================================================================
+
+###########Dockerfile Directives: ENTRYPOINT###############
+
+#ENTRYPOINT forces the cmd provided to it to run always whenever the containeris instantiated
+#However docker exec can be run to connect to the running container to start a different process
+
+============================================================================================================
+
+###########Dockerfile Directives: EXPOSE###############
+
+#Exposing ports that the container is to use
+EXPOSE 22
+
+============================================================================================================
+
+###########Container Volume Management###############
+
+#Create & mount a vol in container during run time
+docker run -it -v /mydata centos:latest /bin/bash
+#to verify run df -h
+
+#the soource dir for this vol in host machine - /var/lib/docker/volumes/containerid/_data
+
+#map a partiicuar dir from host to avol in container
+docker run -it -v /root/build/hostdir:/mydata centos:latest /bin/bash
+
+============================================================================================================
+
+###########Docker Network: List and Inspect###############
+
+docker network ls # lists all the n/w associated with the current host
+docker network ls --no-trunc #lists all n/w with full n/w ids
+
+docker network inspect bridge #to get detaals of any n/w 
+
+============================================================================================================
+
+###########Docker Network: Create and Remove###############
+
+docker network create # to create a new n/w connfig
+docker network create --subnet 10.1.0.0/24 --gateway 10.1.0.1 mybridge01
+
+docker network rm mybridge01 #to remove a n/w adapater
+
+============================================================================================================
+
+###########Docker Network: Assign to Containers###############
+
+ docker network create --subnet 10.1.0.0/16 --gateway 10.1.0.1 --ip-range=10.1.4.0/24 --driver=bridge --label=host4network bridge04
+ #--ip-range gives the rangge of IPs from the subnet a container will be assigned ip from 
+ 
+ docker run -it --name nettest1 --net bridge04 centos:latest /bin/bash
+
+ docker run -it --name nettest2 --net bridge04 --ip 10.1.4.100 centos:latest /bin/bash
+#assigning a static ip from the range

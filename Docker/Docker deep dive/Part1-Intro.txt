@@ -1,0 +1,34 @@
+#######Packaging a Customized Container#################
+#making changes to Ubuntuu xenial base image
+docker run -it ubuntu:xenial /bin/bash
+#make some changes on the the container like add a file to /root folder , update & install packages, create a new user & exit out of container(container in stoppped state)
+##using commit to create a container
+docker commit -m "Installed sshd & added user kumar" -a "kaabhi" clever_jang kaabhi/ubusshd:v1
+
+##doing the same with Dockerfile
+---->starting Dockerfile
+#This ia a custom Ubuntu image with ssh installed annd a user kumar
+FROM ubuntu:xenial
+MAINTAINER kaabhi <ka.abhishek20@gmail.com>
+RUN apt-get -y update && apt-get -y install openssh-server telnet vim sudo
+---------->ending Dockerfile
+docker build -t="kaabhi/ubuntu:v2" .
+
+==========================================================================================================================
+
+#########Running Container Commands with Docker###################
+<Up to now, we have only run an interactive Bash shell from each of our installed images/containers and then interacted directly from within each. In this video, we will show a more detailed method of running commands through the Docker Command Prompt to execute single commands and see the results./>
+
+#to find out what was run on the container from the host
+docker logs containername
+
+#to run any command inside a container from the host --##have to provide full path of the command
+docker exec containername /bin/cat /etc/passwd
+docker exec test_ssh /usr/sbin/service ssh start
+docker exec test_ssh /bin/bash -c "service ssh start"
+
+==========================================================================================================================
+
+#########Exposing our Container with Port Redirects############
+
+docker run -it -p 8022:22 --name=test_ssh kaabhi/ubusshd:v1 /bin/bash

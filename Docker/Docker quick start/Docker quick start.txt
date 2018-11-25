@@ -72,7 +72,7 @@ docker ps
 docker ps -a #gives list of alll docker containers that havve run in the past annd now stopped
 
 #run a container in interactive mode(i) & connected to terminal(t) & diconnected mode(d) and with what command to run when the container starts(/bin/bash)
-docker run -it centos:llatest /bin/bash
+docker run -it centos:latest /bin/bash
 
 yum install elinks #to run a text based browser from terminal
 elinks http://ip
